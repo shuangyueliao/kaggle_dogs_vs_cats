@@ -7,26 +7,18 @@ import os
 from torch.autograd import Variable
 import torchvision.models as models
 
-# prePath = '/media/x/287464E27464B46A/linuxhome/datasets/all/test/'
-prePath = 'C:/Users/Administrator/Desktop/data/test/'
+prePath = '/media/x/287464E27464B46A/linuxhome/datasets/all/test/'
+#prePath = 'C:/Users/Administrator/Desktop/data/test/'
 
 def train(args):
     print(args)
-    # model=torch.load('./models/2.pkl')
-    # model=model.cuda(0)
-    model = models.vgg16(pretrained=True)
-    model.classifier = torch.nn.Sequential(torch.nn.Linear(25088, 4096),
-                                           torch.nn.ReLU(),
-                                           torch.nn.Dropout(p=0.5),
-                                           torch.nn.Linear(4096, 4096),
-                                           torch.nn.ReLU(),
-                                           torch.nn.Dropout(p=0.5),
-                                           torch.nn.Linear(4096, 2))
+    model=torch.load('./models/2.pkl')
+    model=model.cuda(0)
     transform_list = [
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     transform = transforms.Compose(transform_list)
-    with open('./all/sample_submission.csv', 'w', newline='') as myFile:
+    with open('./sample_submission.csv', 'w', newline='') as myFile:
         myWriter = csv.writer(myFile)
         tmp = []
         tmp.append('id')
@@ -38,7 +30,7 @@ def train(args):
                 img = img.resize((224, 224))
                 images = transform(img)
                 images=torch.unsqueeze(images,0)
-                # images=images.cuda(0)
+                images=images.cuda(0)
                 images = Variable(images)
                 outputs = model(images)
                 _, pred = torch.max(outputs.data, 1)
