@@ -3,7 +3,7 @@ import argparse
 
 import numpy as np
 import logging
-import torch, visdom
+import torch, datetime
 import torch.nn.functional as F
 import torch.utils.data as data_utils
 
@@ -12,7 +12,7 @@ from torch.autograd import Variable
 import torchvision.models as models
 
 from dataset import MyDataset
-My_PATH='/home/jiepeng/桌面/MyData'
+My_PATH='/media/x/287464E27464B46A/linuxhome/datasets/all'
 def train(args):
     print(args)
     ds_train = MyDataset(My_PATH, set='train')
@@ -41,6 +41,7 @@ def train(args):
     cost=torch.nn.CrossEntropyLoss()
     cost=cost.cuda(0)
     for epoch in range(args.nb_epoch):
+        starttime = datetime.datetime.now()
         trainAcc = 0
         trainNum = ds_train.__len__()
         for i, (images, label) in enumerate(loader_train):
@@ -69,16 +70,18 @@ def train(args):
             valAcc += torch.sum(pred == label)
 
         print("Epoch [%d/%d] Loss: %.6f,trainAcc: %.4f,valAcc: %.4f" % (
-        epoch + 1, args.nb_epoch, loss.data[0], trainAcc * 1.0 / trainNum, valAcc * 1.0 / (i + 1)))
+        epoch + 1, args.nb_epoch, loss.data[0], int(trainAcc)* 1.0 / trainNum,int(valAcc)* 1.0 / (i + 1)))
         logging.info("Epoch [%d/%d] Loss: %.6f,trainAcc: %.4f,valAcc: %.4f" % (
-        epoch + 1, args.nb_epoch, loss.data[0], trainAcc * 1.0 / trainNum, valAcc * 1.0 / (i + 1)))
+        epoch + 1, args.nb_epoch, loss.data[0],int(trainAcc)* 1.0 / trainNum,int(valAcc)* 1.0 / (i + 1)))
         torch.save(model, "./models/{}.pkl".format(epoch))
-
+        endtime=datetime.datetime.now()
+        print((endtime-starttime).seconds)
+    logging.info('time:{}'.format((endtime-starttime).seconds))
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--nb_epoch', type=int, default=200,
+    parser.add_argument('--nb_epoch', type=int, default=5,
                         help='# of epochs')
-    parser.add_argument('--batch_size', type=int, default=20,
+    parser.add_argument('--batch_size', type=int, default=16,
                         help='batch_size')
     parser.add_argument('--nb_worker', type=int, default=4,
                         help='# of workers')
